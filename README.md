@@ -1,13 +1,12 @@
 # StreamExtension
 
-StreamExtension adds two methods to ZIO's `ZStream` for processing updates
-by key. Use `throttleLatestByKey` to give each key its own emission rate.
-Use `conflateByKey` to collect the latest updates across keys in a shared window.
+StreamExtension 0.1.0 adds two independently importable sets of methods to ZIO's `ZStream`.
+Use `streamextension.syntax._` to throttle or conflate keyed updates.
+Use `streamextension.timeGateSyntax._` to filter or halt a stream by local time in a chosen zone.
 
-## Usage
+## Keyed updates
 
-Import `streamextension.syntax._` to enable both methods. Pass a duration
-in the first argument list and a function that extracts the key in the second.
+Pass a duration in the first argument list and a function that extracts the key in the second.
 This example uses a sensor ID as the key.
 
 ```scala
@@ -35,6 +34,34 @@ operator with a bounded set of keys on long-running streams.
 or upstream completes. In the example, the source completes within the hour,
 so `run` prints `Reading(a,3)` and `Reading(b,2)`. Order across keys is
 unspecified for both operators.
+
+## Local-time gates
+
+```scala
+import java.time.{LocalTime, ZoneId}
+import streamextension.timeGateSyntax._
+import zio.stream.ZStream
+
+val zone = ZoneId.of("America/Toronto")
+val cutoff = LocalTime.of(17, 0)
+val events = ZStream(1, 2, 3)
+
+val daytime = events.dailyCutoff(cutoff, zone)
+val overnight = events.withinTimeWindow(LocalTime.of(22, 0), LocalTime.of(6, 0), zone, Granularity.PerElement)
+val untilClose = events.haltAtCutoff(cutoff, zone)
+```
+
+`dailyCutoff` passes data through the cutoff instant and reopens at midnight.
+`withinTimeWindow` includes both endpoints, wraps across midnight when the end
+precedes the start, and matches a single instant when both endpoints are equal.
+Both gates sample ZIO's clock once per chunk by default. Select
+`Granularity.PerElement` to check each element. They log the initial state
+and subsequent changes when data arrives.
+
+`haltAtCutoff` ends the stream at today's deadline even while upstream is
+idle. Starting at or after the deadline skips upstream. A cutoff in a
+daylight-saving gap expires when the clock jumps forward, and a repeated
+cutoff expires on its first occurrence.
 
 ## Build and test
 
