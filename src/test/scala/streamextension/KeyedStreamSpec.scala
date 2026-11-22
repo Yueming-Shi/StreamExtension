@@ -3,7 +3,7 @@ package streamextension
 import zio._
 import zio.stream.ZStream
 import zio.test._
-import streamextension.syntax._
+import streamextension.keyedStreamSyntax._
 
 object KeyedStreamSpec extends ZIOSpecDefault {
   def spec = suite("keyed stream extensions")(

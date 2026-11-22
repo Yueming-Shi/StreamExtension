@@ -1,7 +1,7 @@
 # StreamExtension
 
 StreamExtension 0.1.0 adds two independently importable sets of methods to ZIO's `ZStream`.
-Use `streamextension.syntax._` to throttle or conflate keyed updates.
+Use `streamextension.keyedStreamSyntax._` to throttle or conflate keyed updates.
 Use `streamextension.timeGateSyntax._` to filter or halt a stream by local time in a chosen zone.
 
 ## Keyed updates
@@ -10,7 +10,7 @@ Pass a duration in the first argument list and a function that extracts the key 
 This example uses a sensor ID as the key.
 
 ```scala
-import streamextension.syntax._
+import streamextension.keyedStreamSyntax._
 import zio._
 import zio.stream.ZStream
 

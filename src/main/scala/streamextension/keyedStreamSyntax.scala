@@ -3,7 +3,7 @@ package streamextension
 import zio.{Duration, Schedule}
 import zio.stream.{ZSink, ZStream}
 
-object syntax {
+object keyedStreamSyntax {
   implicit final class KeyedStreamOps[R, E, A](private val stream: ZStream[R, E, A]) extends AnyVal {
     def throttleLatestByKey[K](window: Duration)(key: A => K): ZStream[R, E, A] =
       stream.groupByKey(key) { (_, events) =>
